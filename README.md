@@ -17,6 +17,49 @@ iCloud Windows 助手 —— 查看 iCloud 照片库中哪些文件仅在云端�
 
 在「设置 → iCloud 照片」（导航位于 agent-presets 与插件之间）中查看与操作。
 
+## 安装
+
+前提：已装 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）与 Node.js 18+。
+
+### 方式一：npm（推荐）
+
+```bash
+dsh plugin --profile desktop add dsh-icloud-help
+```
+
+### 方式二：从 GitHub Release 装
+
+到 [Releases](https://github.com/3453252480/dsh-icloud-help/releases) 下载 `.tar.gz`，然后：
+
+```bash
+dsh plugin --profile desktop add <下载路径>/dsh-icloud-help-0.2.5.tar.gz
+```
+
+### 方式三：从源码目录装
+
+```bash
+git clone https://github.com/3453252480/dsh-icloud-help.git
+dsh plugin --profile desktop add ./dsh-icloud-help
+```
+
+### 安装后
+
+**重启 DSH**，再打开「设置 → iCloud 照片」。
+
+> ⚠️ 前端 UI 带长缓存（`immutable`），装完或更新后必须**重启 DSH**；
+> 仅刷新页面可能仍在跑旧界面。
+
+### 依赖：ffmpeg
+
+HEIC 与视频缩略图需要 **ffmpeg**。Windows 上：
+
+```powershell
+winget install Gyan.FFmpeg
+```
+
+插件会自动在 `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*` 下寻找，
+也可确保 `ffmpeg` 在 `PATH` 上。缺失时 HEIC/视频格子显示「无法预览」，其余功能不受影响。
+
 ## 技术要点
 
 iCloud 照片目录（`%USERPROFILE%\Pictures\iCloud Photos\Photos`）是一个 Apple 私有重解析点
@@ -50,10 +93,8 @@ iCloud 照片目录（`%USERPROFILE%\Pictures\iCloud Photos\Photos`）是一个 
 
 ## 依赖
 
-- **ffmpeg**（必需，用于 HEIC 与视频缩略图）。本机默认路径：
-  `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*\bin\ffmpeg.exe`，
-  也可放在 `PATH` 上。缺失时 HEIC/视频无法生成缩略图（会在格子里显示「无法预览」）。
-- **sharp**（可选，处理 JPEG/PNG 等普通位图更快）。
+- **ffmpeg**（必需）—— 用于 HEIC 与视频缩略图，安装方式见上方「依赖：ffmpeg」。
+- **sharp**（可选）—— 处理 JPEG/PNG 等普通位图更快；缺失时自动回退。
 
 ## HTTP 端点
 
@@ -80,10 +121,13 @@ iCloud 照片目录（`%USERPROFILE%\Pictures\iCloud Photos\Photos`）是一个 
   "scope": "all",
   "perFileBudgetSec": 300,
   "concurrency": 2,
-  "autoStart": false,
-  "autoIntervalSec": 120
+  "autoStart": true,
+  "autoIntervalSec": 300
 }
 ```
+
+`autoIntervalSec` 单位是秒，取值 10 ~ 86400（默认 300，即 5 分钟）。
+界面上按**分钟**填写，保存时会换算成秒并夹到该范围。
 
 ## 许可
 
